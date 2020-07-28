@@ -122,16 +122,19 @@ killed=False
 
 
 for subdir, dirs, files in os.walk(ddirectories):
+cnt = 1
     for file in files:
-        print(os.path.join(subdir, file))
+        print("Line {}: {}".format(cnt, os.path.join(subdir, file)))
         if killed:
             driver = webdriver.Chrome(options=options)
             print("restarted driver")
         try:
 
             downloadTiddle(os.path.join(subdir, file))
+
         except:
             print(os.path.join(subdir, file)+" is not a tiddle ")
             driver.close()
             killed=True
+        cnt += 1
 driver.close()
