@@ -120,9 +120,9 @@ def downloadTiddle(urlend):
 
 killed=False
 
-
-for subdir, dirs, files in os.walk(ddirectories):
 cnt = 1
+for subdir, dirs, files in os.walk(ddirectories):
+
     for file in files:
         print("Line {}: {}".format(cnt, os.path.join(subdir, file)))
         if killed:
