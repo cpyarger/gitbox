@@ -1,7 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import os
 import glob
@@ -15,10 +17,13 @@ options.add_experimental_option("prefs", {
   "download.default_directory": ddirectories,
   "download.prompt_for_download": False,
   "download.directory_upgrade": True,
-  "safebrowsing.enabled": True
+  "safebrowsing.enabled": True,
+  "start-maximized":True
 })
 
+
 driver = webdriver.Chrome(options=options)
+driver.maximize_window()
 def download_wait(directory, timeout, nfiles=None):
     """
     Wait for downloads to finish with a specified timeout.
@@ -54,34 +59,79 @@ def downloadTiddle(urlend):
     filepaths = r'C:\Users\cpyar\Desktop\gitbox\password.txt'
     with open(filepaths) as fp:
         password = fp.readline()
-        driver.get("http://chris:"+password+"@docbox.flint.com:8081/"+urlend)
+        driver.get("file:///C:/Users/cpyar/Desktop/gitbox/intermediate-empty-tiddle.html")
+        # Click More Tab on Sidebar
+        moretab=driver.find_element_by_css_selector("a[content=TabMore]");
+        moretab.send_keys(Keys.RETURN)
+        #Click Shadowed subtab on sidebar
+        soretab=driver.find_element_by_css_selector("a[content=TabMoreShadowed]");
+        soretab.send_keys(Keys.RETURN)
+        #Click Import Tiddlers Link
+        elem = driver.find_element_by_link_text('ImportTiddlers')
+        elem.send_keys(Keys.RETURN)
+        #upload file to tiddle
 
-        elem = driver.find_element_by_link_text('save to file')
+        fileinput = driver.find_element_by_name('txtBrowse')
+        fileinput.send_keys(urlend)
+        #click "OPEN" button
+        OPENBTN = driver.find_element_by_link_text('open')
+        OPENBTN.send_keys(Keys.RETURN)
+        # do ??
+        # Click import aLL CHECKBOX ==
 
+
+        argh=False
+        while not argh:
+            try:
+                cb = driver.find_element(By.XPATH,'/html/body/div[7]/div[4]/div[2]/div[1]/div[6]/form/div[1]/div/div/div/table/thead/tr/th[1]/input')
+                argh=True
+            except:
+                pass
+        #act= ActionChains(driver).move_to_element(cb).click().perform();
+
+        #time.sleep(3)
+        cb.click()
+        argh=False
+        while not argh:
+            try:
+                inpbtn = driver.find_element(By.XPATH,'/html/body/div[7]/div[4]/div[2]/div[1]/div[6]/form/div[2]/a[2]')
+                argh=True
+            except:
+                pass
+        inpbtn.send_keys(Keys.RETURN)
+        # cLICK IMPORT BUTTON
+        #IMPORTBTN = driver.find_element_by_link_text('import')
+        #IMPORTBTN.send_keys(Keys.RETURN)
+        #download new intermediate tiddle
+
+        #Profit?
+
+
+
+        elem = driver.find_element(By.XPATH,'/html/body/div[7]/div[3]/div[1]/a[6]')
         elem.send_keys(Keys.RETURN)
         assert "No results found." not in driver.page_source
-        download_wait(ddirectories,15)
+        download_wait(ddirectories,60)
 
-        if not os.path.exists(ddirectories+"\\"+urlend):
-            os.makedirs(ddirectories+"\\"+urlend)
-        txtfiles = []
+
+
         for file in glob.glob(ddirectories+"\*.html"):
-            os.replace(file, ddirectories+"\\"+urlend+"\\"+urlend+".html")
+            os.replace(file, urlend)
+
+killed=False
 
 
+for subdir, dirs, files in os.walk(ddirectories):
+    for file in files:
+        print(os.path.join(subdir, file))
+        if killed:
+            driver = webdriver.Chrome(options=options)
+            print("restarted driver")
+        try:
 
-
-with open(tiddlelist) as fp:
-   line = fp.readline()
-   cnt = 1
-   while line:
-       print("Line {}: {}".format(cnt, line.strip()))
-       line = fp.readline()
-       ln = line.rstrip('\n')
-       try:
-           if not os.path.exists(ddirectories+"\\"+ln+"\\"+ln+".html"):
-               downloadTiddle(ln)
-       except:
-           print(ln+" is not a tiddle ")
-       cnt += 1
-   driver.close()
+            downloadTiddle(os.path.join(subdir, file))
+        except:
+            print(os.path.join(subdir, file)+" is not a tiddle ")
+            driver.close()
+            killed=True
+driver.close()
