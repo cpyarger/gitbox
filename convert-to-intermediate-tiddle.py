@@ -128,6 +128,7 @@ for subdir, dirs, files in os.walk(ddirectories):
         if killed:
             driver = webdriver.Chrome(options=options)
             print("restarted driver")
+            killed=False
         try:
 
             downloadTiddle(os.path.join(subdir, file))

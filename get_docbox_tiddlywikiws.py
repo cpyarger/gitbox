@@ -75,9 +75,8 @@ with open(tiddlelist) as fp:
    line = fp.readline()
    cnt = 1
    while line:
-
-       line = fp.readline()
        print("Line {}: {}".format(cnt, line.strip()))
+       line = fp.readline()
        ln = line.rstrip('\n')
        try:
            if not os.path.exists(ddirectories+"\\"+ln+"\\"+ln+".html"):

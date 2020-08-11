@@ -10,7 +10,7 @@ import glob
 ddirectories=r"C:\Users\cpyar\Desktop\gitbox\Files"
 tiddlelist = r'C:\Users\cpyar\Desktop\gitbox\tiddle_list_2020-07-27.txt'
 passwordpath = r'C:\Users\cpyar\Desktop\gitbox\password.txt'
-tiddlefile=r"file:///C:/Users/cpyar/Desktop/gitbox/final-empty-tiddle.html"
+tiddlefile=r"https://tiddlywiki.com/upgrade.html"
 if not os.path.exists(ddirectories):
     os.makedirs(ddirectories)
 
@@ -24,8 +24,6 @@ options.add_experimental_option("prefs", {
 })
 
 
-driver = webdriver.Chrome(options=options)
-driver.maximize_window()
 def download_wait(directory, timeout, nfiles=None):
     """
     Wait for downloads to finish with a specified timeout.
@@ -58,21 +56,16 @@ def download_wait(directory, timeout, nfiles=None):
 
 
 def downloadTiddle(urlend):
-    folder=ddirectories+"\\"+urlend
-    file=folder+"\\"+urlend+".html"
+    folder=urlend
+    file=urlend
     with open(passwordpath) as fp:
         password = fp.readline()
-        driver.get(tiddlefile)
+        driver.get("https://tiddlywiki.com/upgrade.html")
         # Click More Tab on Sidebar
-
-        toolstab=driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/div[1]/div/div/div/div[5]/div/p/div/div[1]/button[3]')
-        toolstab.send_keys(Keys.RETURN)
-        #Click Shadowed subtab on sidebar
-        print(urlend)
         argh=False
         while not argh:
             try:
-                fileinput = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/div[1]/div/div/div/div[5]/div/p/div/div[3]/div[3]/div[9]/p/div/input')
+                fileinput = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/section/section[1]/div/div/p[3]/input')
                 argh=True
             except:
                 pass
@@ -82,7 +75,7 @@ def downloadTiddle(urlend):
         argh=False
         while not argh:
             try:
-                inpbtn = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/section/div[1]/div[6]/p[2]/button[2]')
+                inpbtn = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/section/section[1]/div/div/div[1]/p[1]/button')
                 argh=True
             except:
                 pass
@@ -92,51 +85,30 @@ def downloadTiddle(urlend):
         argh=False
         while not argh:
             try:
-                DLBTN = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/div[1]/div/div/div/div[3]/p/div/button[3]')
+                DLBTN = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div/section/section[1]/div/div/div[2]/p[3]/button')
                 argh=True
             except:
                 pass
 
         DLBTN.send_keys(Keys.RETURN)
 
-
-
-
-
-
         assert "No results found." not in driver.page_source
         download_wait(ddirectories,60)
-
-
 
         for files in glob.glob(ddirectories+"\*.html"):
             os.replace(files, file)
 
 
 
-def doloop():
-    with open(tiddlelist) as fp:
-        killed=False
-        line = fp.readline()
-        cnt = 1
-        while line:
-            print("Line {}: {}".format(cnt, line.strip()))
-            line = fp.readline()
-            ln = line.rstrip('\n')
-            try:
-                if killed:
-                    driver = webdriver.Chrome(options=options)
-                    print("restarted driver")
-                    killed=False
-                downloadTiddle(ln)
-            except:
-                print(ln+" is not a tiddle ")
-                #driver.close()
-                #killed=True
-            cnt += 1
 
-def singleTest(folder):
-    downloadTiddle(folder)
-    #input()
-doloop()
-#driver.close()
+killed=False
+cnt = 1
+for subdir, dirs, files in os.walk(ddirectories):
+
+    for file in files:
+        print("Line {}: {}".format(cnt, os.path.join(subdir, file)))
+        driver = webdriver.Chrome(options=options)
+        downloadTiddle(os.path.join(subdir,file))
+        driver.close()
+        cnt+=1
+#singleTest('aws')
