@@ -1,8 +1,0 @@
-Get-ChildItem Files | ForEach-Object {cd "$($_.FullName)"
-git init
-git add -A
-git commit -am "initial commit"
-git remote remove remote
-git remote add remote git@gitbox.org:BOSI/"$($_.Name).git"
-git push --force -u remote master
-}
